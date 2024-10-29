@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 s=ubuntu@your_server_ip
 ssh -i ~/.ssh/school $s
 
