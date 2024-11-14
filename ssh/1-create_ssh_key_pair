@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 # comment here
-ssh-keygen -t rsa -b 4096 -f school -N "betty"
+ssh-keygen -t rsa -b 4096 -m PEM -f school -N "betty"
 
