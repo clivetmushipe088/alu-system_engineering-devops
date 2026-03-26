@@ -1,5 +1,3 @@
 #!/usr/bin/env bash
-# comment here
-s=ubuntu@your_server_ip
-ssh -i ~/.ssh/school $s
-
+# Connects to server using private key
+ssh -i ~/.ssh/school ubuntu@3.92.187.221
