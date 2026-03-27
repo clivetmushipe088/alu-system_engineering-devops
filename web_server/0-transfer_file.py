@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Transfers a file from client to server using scp
 if [ "$#" -lt 4 ]; then
     echo "Usage: 0-transfer_file PATH_TO_FILE IP USERNAME PATH_TO_SSH_KEY"
