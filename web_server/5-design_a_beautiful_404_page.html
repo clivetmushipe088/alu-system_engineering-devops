@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Ceci n'est pas une page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #1a1208;
+      --cream:  #f5eed8;
+      --gold:   #c8a84b;
+      --gold2:  #e8c96a;
+      --rust:   #8b3a1a;
+      --sky:    #a8c4d4;
+      --cloud:  #ddeaf2;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'EB Garamond', Georgia, serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Painterly background ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 30%, #2a3d5a 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 20% 80%, #3d2a1a 0%, transparent 60%),
+        linear-gradient(160deg, #0d0b07 0%, #1a1208 50%, #0d1a22 100%);
+      z-index: 0;
+    }
+
+    /* subtle grain */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .scene {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      gap: 0;
+    }
+
+    /* ── Floating clouds ── */
+    .clouds {
+      position: fixed; top: 0; left: 0; width: 100%; height: 45%;
+      pointer-events: none; z-index: 2; overflow: hidden;
+    }
+    .cloud {
+      position: absolute;
+      background: var(--cloud);
+      border-radius: 50%;
+      opacity: 0.12;
+      filter: blur(18px);
+      animation: drift linear infinite;
+    }
+    .cloud:nth-child(1){ width:320px;height:120px;top:8%;left:-10%; animation-duration:38s; }
+    .cloud:nth-child(2){ width:200px;height:80px; top:22%;left:30%; animation-duration:52s; animation-delay:-14s; opacity:.08; }
+    .cloud:nth-child(3){ width:260px;height:100px;top:5%; left:60%; animation-duration:44s; animation-delay:-7s;  }
+    .cloud:nth-child(4){ width:180px;height:70px; top:32%;left:75%; animation-duration:60s; animation-delay:-22s; opacity:.07; }
+    @keyframes drift { from{transform:translateX(0)} to{transform:translateX(110vw)} }
+
+    /* ── Museum wall label (top) ── */
+    .museum-label-top {
+      font-family: 'EB Garamond', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      margin-bottom: 2.2rem;
+      animation: fadeUp 1s ease both;
+    }
+
+    /* ── The gilded frame ── */
+    .frame-wrap {
+      position: relative;
+      animation: fadeUp 1.1s ease 0.15s both;
+    }
+
+    .frame-outer {
+      padding: 18px;
+      background:
+        linear-gradient(135deg, var(--gold2) 0%, #7a5c1e 25%, var(--gold) 50%, #5a3e0e 75%, var(--gold2) 100%);
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 2px #9a7830,
+        0 0 0 5px #2a1e08,
+        0 0 0 7px #7a5c1e,
+        0 25px 80px rgba(0,0,0,0.9),
+        inset 0 1px 0 rgba(255,220,100,0.4),
+        inset 0 -1px 0 rgba(0,0,0,0.5);
+    }
+
+    /* inner frame bevel */
+    .frame-inner {
+      padding: 12px;
+      background: linear-gradient(135deg, #3a2a08 0%, var(--gold) 30%, #c8a020 70%, #3a2a08 100%);
+      border-radius: 2px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), inset 0 -2px 4px rgba(255,210,80,0.2);
+    }
+
+    /* ── Canvas (the painting itself) ── */
+    .canvas {
+      width: min(520px, 90vw);
+      aspect-ratio: 4/3;
+      background: linear-gradient(175deg, #b8d4e8 0%, #94b8cc 35%, #7aa0b8 55%, #c8b080 56%, #a89060 80%, #8a7048 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+
+    /* horizon line */
+    .canvas::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: 55%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,0,0,0.15) 20%, rgba(0,0,0,0.2) 80%, transparent);
+    }
+
+    /* subtle sky texture */
+    .canvas::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 30% 20%, rgba(255,255,255,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 30% 20% at 70% 10%, rgba(255,255,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ── The floating bowler hat ── */
+    .hat {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      animation: floatHat 5s ease-in-out infinite;
+    }
+    @keyframes floatHat {
+      0%,100% { transform: translateX(-50%) translateY(0) rotate(-1deg); }
+      50%      { transform: translateX(-50%) translateY(-10px) rotate(1deg); }
+    }
+
+    /* hat SVG inline */
+    .hat svg { width: 100%; height: auto; }
+
+    /* ── The 404 number ── */
+    .number-404 {
+      font-family: 'Playfair Display', 'Times New Roman', serif;
+      font-size: clamp(5rem, 18vw, 9rem);
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-shadow: 2px 3px 0 rgba(0,0,0,0.15);
+      position: relative;
+      z-index: 2;
+      margin-top: 4rem;
+    }
+
+    /* ── Magritte-style plaque inside painting ── */
+    .inner-plaque {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 78%;
+      background: rgba(245, 238, 216, 0.92);
+      border: 1.5px solid rgba(0,0,0,0.25);
+      padding: 0.5rem 1rem;
+      text-align: center;
+      z-index: 3;
+    }
+    .inner-plaque span {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(0.75rem, 2.5vw, 1rem);
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Museum plaque below frame ── */
+    .plaque {
+      margin-top: 0;
+      background: linear-gradient(135deg, #c8a84b, #e8c96a 40%, #c8a84b 60%, #a07828 100%);
+      padding: 1px;
+      width: min(420px, 80vw);
+      animation: fadeUp 1.1s ease 0.3s both;
+    }
+    .plaque-inner {
+      background: #1e160a;
+      padding: 1rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .plaque-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .plaque-sub {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: rgba(200,168,75,0.65);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Action area ── */
+    .actions {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.9rem;
+      animation: fadeUp 1.1s ease 0.5s both;
+    }
+
+    .quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+      color: rgba(245,238,216,0.55);
+      text-align: center;
+      max-width: 38ch;
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 0.4rem;
+      padding: 0.7rem 2.2rem;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 100%);
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 4px 20px rgba(200,168,75,0.3);
+    }
+    .btn:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    /* ── Footer ── */
+    .footer {
+      position: fixed;
+      bottom: 1.2rem; left: 0; right: 0;
+      text-align: center;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(200,168,75,0.3);
+      z-index: 10;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- floating clouds -->
+  <div class="clouds" aria-hidden="true">
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+  </div>
+
+  <main class="scene">
+
+    <p class="museum-label-top">Collection Permanente · Salle Numérique</p>
+
+    <div class="frame-wrap">
+      <div class="frame-outer">
+        <div class="frame-inner">
+
+          <!-- The Painting -->
+          <div class="canvas">
+
+            <!-- Floating bowler hat (Magritte's signature) -->
+            <div class="hat" aria-hidden="true">
+              <svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg">
+                <!-- brim -->
+                <ellipse cx="60" cy="72" rx="54" ry="12" fill="#1a1208"/>
+                <ellipse cx="60" cy="70" rx="54" ry="10" fill="#2a1e10"/>
+                <!-- crown -->
+                <path d="M22 70 Q20 30 60 26 Q100 30 98 70 Z" fill="#1a1208"/>
+                <path d="M25 70 Q23 33 60 29 Q97 33 95 70 Z" fill="#231a0d"/>
+                <!-- highlight -->
+                <path d="M35 50 Q38 35 55 33" stroke="rgba(255,200,80,0.15)" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <!-- Big 404 -->
+            <div class="number-404">404</div>
+
+            <!-- Magritte-style label inside the painting -->
+            <div class="inner-plaque">
+              <span>Ceci n'est pas une page</span>
+            </div>
+
+          </div><!-- /canvas -->
+
+        </div><!-- /frame-inner -->
+      </div><!-- /frame-outer -->
+    </div><!-- /frame-wrap -->
+
+    <!-- Museum plaque -->
+    <div class="plaque">
+      <div class="plaque-inner">
+        <span class="plaque-title">La Trahison des Pages</span>
+        <span class="plaque-sub">Numérique sur navigateur · circa 2024</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <p class="quote">"The page you seek exists only as an idea — beautiful, unreachable, and entirely imaginary."</p>
+      <a class="btn" href="/">Return to Reality</a>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    Musée de l'Internet · Aile des Pages Perdues
+  </footer>
+
+</body>
+</html>
