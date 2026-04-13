@@ -1,41 +1,19 @@
 #!/usr/bin/env bash
-# Configures a new Ubuntu machine with Nginx
-# Adds a custom HTTP response header X-Served-By with the server's hostname
+# Configures a new Ubuntu machine with Nginx and a custom HTTP response header
+# Header: X-Served-By: <hostname>
+# shellcheck disable=SC2154
 
-# Install Nginx if not already installed
+# Update package list and install Nginx
 apt-get update -y
 apt-get install -y nginx
 
-# Add custom header to Nginx config using the server's hostname
+# Get the hostname of the current server
 HOSTNAME=$(hostname)
 
-cat > /etc/nginx/sites-available/default << EOF
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+# Configure the custom header in the Nginx default site
+# Insert the header into the server block using sed
+sed -i "s/server_name _;/server_name _;\n\tadd_header X-Served-By $HOSTNAME;/" /etc/nginx/sites-available/default
 
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
-
-    server_name _;
-
-    add_header X-Served-By \$hostname;
-
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-
-    location /redirect_me {
-        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-    }
-
-    error_page 404 /404.html;
-    location = /404.html {
-        root /var/www/html;
-    }
-}
-EOF
-
-# Restart Nginx to apply changes
+# Ensure Nginx is enabled and restarted
 service nginx restart
 
