@@ -1,12 +1,22 @@
 #!/usr/bin/env bash
 # Fixes Nginx to listen on port 80 of all IPv4 addresses
 
-# Install Nginx if missing, update package list quietly
+# Update package list and install Nginx if missing
 apt-get update -qq && apt-get install -y nginx
 
-# Ensure default site listens on IPv4 port 80 (0.0.0.0:80)
-sed -i 's/^\s*listen\s\+.*/listen 0.0.0.0:80;/' /etc/nginx/sites-available/default
+# Ensure the default site configuration has an explicit IPv4 listen directive
+if ! grep -q "listen 0.0.0.0:80" /etc/nginx/sites-available/default; then
+    # If IPv6 listen exists, insert IPv4 before it
+    if grep -q "listen \[::\]:80" /etc/nginx/sites-available/default; then
+        sed -i '/listen \[::\]:80/i \    listen 0.0.0.0:80;' /etc/nginx/sites-available/default
+    else
+        # Otherwise replace the first listen line with IPv4 listen
+        sed -i 's/^\s*listen\s\+.*/listen 0.0.0.0:80;/' /etc/nginx/sites-available/default
+    fi
+fi
 
-# Start Nginx service (or restart if already running)
-service nginx start || nginx
+# Restart Nginx to apply configuration changes
+service nginx restart
 
+# Output the number of Nginx processes (expected: 2 – master + worker)
+pgrep -c nginx
