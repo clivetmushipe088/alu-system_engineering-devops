@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 1-install_nginx_web_server - Install Nginx and serve "Holberton School" page
 
-# Update package list and install Nginx
+# Update the package list and install Nginx
 apt-get update -y
 apt-get install -y nginx
 
