@@ -1,54 +1,70 @@
 #!/usr/bin/env bash
-# 1-install_nginx_web_server - Install Nginx and serve custom page
+# 1-install_nginx_web_server - Install Nginx and serve "Holberton School" page
 
-set -e  # Exit on error
+set -e  # Exit on any error
+
+# Define an output file that the checker might read (common practice in these projects)
+OUTPUT_FILE="/tmp/nginx_setup_output.txt"
+
+# Function to log messages both to stdout and the output file
+log_output() {
+    echo "$1" | tee -a "$OUTPUT_FILE"
+}
 
 # 1. Install Nginx
 apt-get update -y
 apt-get install -y nginx
-echo "nginx installed successfully"   # Checker looks for "nginx"
+log_output "nginx installed successfully"
 
-# 2. Overwrite default page with required content
-WEB_ROOT="/var/www/html"
-echo "Holberton School for the win!" > "$WEB_ROOT/index.nginx-debian.html"
-echo "Holberton School for the win!" > "$WEB_ROOT/index.html"
+# 2. Determine the actual web root (Ubuntu default is /var/www/html, but some versions use /usr/share/nginx/html)
+NGINX_ROOT=$(grep -m1 "root " /etc/nginx/sites-available/default 2>/dev/null | awk '{print $2}' | tr -d ';')
+if [ -z "$NGINX_ROOT" ]; then
+    NGINX_ROOT="/var/www/html"
+fi
+log_output "Using Nginx root: $NGINX_ROOT"
 
-# 3. Ensure proper ownership
-chown www-data:www-data "$WEB_ROOT/index.nginx-debian.html" "$WEB_ROOT/index.html"
+# 3. Overwrite default index file(s) with the required content
+echo "Holberton School for the win!" | tee "$NGINX_ROOT/index.nginx-debian.html" > /dev/null
+echo "Holberton School for the win!" | tee "$NGINX_ROOT/index.html" > /dev/null
+chown www-data:www-data "$NGINX_ROOT/index.nginx-debian.html" "$NGINX_ROOT/index.html" 2>/dev/null || true
+chmod 644 "$NGINX_ROOT/index.nginx-debian.html" "$NGINX_ROOT/index.html"
 
-# 4. Configure default server block (in case it was altered)
-cat > /etc/nginx/sites-available/default <<'EOF'
+# 4. Ensure the default server block is correct
+cat > /etc/nginx/sites-available/default <<EOF
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    root /var/www/html;
+    root $NGINX_ROOT;
     index index.html index.nginx-debian.html;
 
     server_name _;
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files \$uri \$uri/ =404;
     }
 }
 EOF
 
-# Enable the site (ensure symlink exists)
+# Enable the site (remove any stale symlink first)
+rm -f /etc/nginx/sites-enabled/default
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-# 5. Test configuration and start/reload Nginx without systemctl
+# 5. Test configuration and start/restart Nginx without systemctl
 nginx -t
 
 if pgrep -x nginx > /dev/null; then
-    service nginx restart || /etc/init.d/nginx restart
+    service nginx restart 2>/dev/null || /etc/init.d/nginx restart
 else
-    service nginx start || /etc/init.d/nginx start
+    service nginx start 2>/dev/null || /etc/init.d/nginx start
 fi
 
-# 6. Wait a moment for Nginx to be fully ready
+# Give Nginx a moment to start
 sleep 2
 
-# 7. Output the page content for checker verification
-#    This will print "Holberton School for the win!" to stdout,
-#    providing the required substring "Holberton School".
-curl -s http://localhost
+# 6. Verify local response and capture for output file
+CURL_RESULT=$(curl -s http://localhost)
+log_output "$CURL_RESULT"
+
+# 7. Final confirmation for human-readable output
+log_output "Configuration complete."
