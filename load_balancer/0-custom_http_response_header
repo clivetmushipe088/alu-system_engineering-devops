@@ -1,19 +1,34 @@
 #!/usr/bin/env bash
-# Configures a new Ubuntu machine with Nginx and a custom HTTP response header
-# Header: X-Served-By: <hostname>
+# 0-custom_http_response_header - Configure Nginx with custom X-Served-By header
+
+# Ignore SC2154 for shellcheck (variable assigned outside script context)
 # shellcheck disable=SC2154
 
-# Update package list and install Nginx
-apt-get update -y
-apt-get install -y nginx
+set -e  # Exit immediately if a command exits with a non-zero status
 
-# Get the hostname of the current server
-HOSTNAME=$(hostname)
+# Update package list and install Nginx if not already present
+if ! command -v nginx &> /dev/null; then
+    apt-get update -y
+    apt-get install -y nginx
+fi
 
-# Configure the custom header in the Nginx default site
-# Insert the header into the server block using sed
-sed -i "s/server_name _;/server_name _;\n\tadd_header X-Served-By $HOSTNAME;/" /etc/nginx/sites-available/default
+# Ensure Nginx is enabled and running
+systemctl enable nginx
+if ! systemctl is-active --quiet nginx; then
+    systemctl start nginx
+fi
 
-# Ensure Nginx is enabled and restarted
-service nginx restart
+# Create a configuration snippet for the custom header
+CUSTOM_CONF="/etc/nginx/conf.d/custom_header.conf"
 
+# Write the add_header directive. Using $hostname Nginx variable for dynamic value.
+echo 'add_header X-Served-By $hostname;' > "$CUSTOM_CONF"
+
+# Test Nginx configuration for syntax errors
+nginx -t
+
+# Reload Nginx to apply changes without downtime
+systemctl reload nginx
+
+# Success message
+echo "Nginx configured successfully. Custom header X-Served-By added."
